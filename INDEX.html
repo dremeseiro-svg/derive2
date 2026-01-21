@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DANIEL REMESEIRO - DOSSIER INTERACTIVO</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+        /* CONFIGURACIÓN DE PÁGINA FÍSICA */
+        @page { size: A4; margin: 2.5cm 3.5cm; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            color: #000;
+            background-color: #fff;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        .page-container {
+            max-width: 700px; 
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header { text-align: center; margin-bottom: 60px; padding-top: 40px; }
+        h1 { font-family: 'Libre Baskerville', serif; font-size: 2rem; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin: 0; }
+        .subtitle { text-transform: uppercase; letter-spacing: 8px; font-size: 0.75rem; margin-top: 15px; font-weight: 600; }
+
+        .manifesto {
+            background: #fafafa;
+            padding: 40px;
+            border: 1px solid #000;
+            margin-bottom: 60px;
+            font-family: 'Libre Baskerville', serif;
+            font-style: italic;
+            text-align: justify;
+            font-size: 1rem;
+        }
+
+        /* GALERÍA */
+        .gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        /* CONTENEDOR DE FOTO CON LUPA RESTAURADA */
+        .photo-card {
+            position: relative; /* CRÍTICO para la lupa */
+            cursor: pointer;
+            page-break-inside: avoid;
+            transition: transform 0.4s ease;
+        }
+
+        .photo-card:hover { transform: translateY(-5px); }
+
+        .photo-card img {
+            width: 100%;
+            height: auto;
+            border: 1px solid #000;
+            display: block;
+            transition: filter 0.3s ease;
+        }
+
+        .photo-card:hover img { filter: brightness(0.7); }
+
+        /* LA LUPA REAPARECE AQUÍ */
+        .photo-card::after {
+            content: '🔍';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            opacity: 0;
+            transition: 0.3s ease;
+            z-index: 10;
+        }
+
+        .photo-card:hover::after { opacity: 1; }
+
+        .photo-meta {
+            margin-top: 10px;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* RESTO DE SECCIONES */
+        .curatorial { border-top: 2px solid #000; padding-top: 40px; margin-top: 40px; }
+        .curatorial h2 { font-family: 'Libre Baskerville', serif; font-size: 1.5rem; margin-bottom: 30px; text-transform: uppercase; }
+        .desc-item { margin-bottom: 30px; page-break-inside: avoid; }
+        .desc-item h4 { font-family: 'Libre Baskerville', serif; font-size: 1.1rem; margin-bottom: 5px; }
+
+        .conclusion {
+            margin: 50px 0;
+            padding: 30px;
+            border-left: 3px solid #000;
+            font-family: 'Libre Baskerville', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            background-color: #fdfdfd;
+            page-break-inside: avoid;
+        }
+
+        .footer-block {
+            page-break-inside: avoid;
+            border-top: 1px solid #000;
+            padding-top: 40px;
+            text-align: center;
+        }
+
+        .author-footer { font-weight: 700; text-transform: uppercase; letter-spacing: 6px; font-size: 1.1rem; display: block; margin-bottom: 15px; }
+        .contact-line { display: flex; justify-content: center; gap: 25px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; margin-bottom: 20px; }
+        .contact-line a { color: #000; text-decoration: none; border-bottom: 1px solid #000; }
+        .copyright-line { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 2px; color: #555; }
+
+        /* --- VISOR LIGHTBOX --- */
+        #lightbox {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.98);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #lightbox-img { max-width: 80%; max-height: 65vh; border: 1px solid #333; }
+        #lightbox-caption { color: #fff; margin-top: 15px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 3px; }
+
+        .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: none; color: #fff; font-size: 3.5rem; cursor: pointer; padding: 20px; z-index: 10000; }
+        .prev-arrow { left: 2%; } .next-arrow { right: 2%; }
+
+        .lightbox-controls { margin-top: 30px; display: flex; gap: 15px; }
+        .btn-lightbox { background: none; border: 1px solid #fff; color: #fff; padding: 8px 20px; cursor: pointer; text-transform: uppercase; font-size: 0.65rem; }
+        .btn-lightbox:hover { background: #fff; color: #000; }
+
+        .no-print-zone { display: flex; justify-content: center; padding: 40px 0; }
+        .btn-pdf { background-color: #000; color: #fff; border: 2px solid #000; padding: 12px 35px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; }
+
+        /* AJUSTES DE IMPRESIÓN */
+        @media print {
+            #lightbox, .no-print-zone, .nav-arrow, .lightbox-controls, .photo-card::after { display: none !important; }
+            body { -webkit-print-color-adjust: exact; background-color: white !important; }
+            .photo-card { transform: none !important; }
+            .page-container { width: 100%; max-width: 100%; padding: 0; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page-container">
+        <header id="inicio">
+            <h1>DÉRIVE / SOCIEDAD ERRANTE</h1>
+            <div class="subtitle">DANIEL REMESEIRO</div>
+        </header>
+
+        <section class="manifesto">
+            "Errar no se refiere a ningún lugar o destino, no consiste en llegar de un lugar a otro ni en el movimiento como medio para un fin. Antes bien, consiste en dejar vagar el alma y la mente."
+        </section>
+
+        <div class="gallery">
+            <div class="photo-card" onclick="openLightbox(0)"><img src="FOTO1.jpg"><div class="photo-meta">ESTUDIO 01 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(1)"><img src="FOTO2.jpg"><div class="photo-meta">ESTUDIO 02 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(2)"><img src="FOTO3.jpg"><div class="photo-meta">ESTUDIO 03 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(3)"><img src="FOTO4.jpg"><div class="photo-meta">ESTUDIO 04 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(4)"><img src="FOTO5.jpg"><div class="photo-meta">ESTUDIO 05 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(5)"><img src="FOTO6.jpg"><div class="photo-meta">ESTUDIO 06 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(6)"><img src="FOTO7.jpg"><div class="photo-meta">ESTUDIO 07 | 60x40 cm</div></div>
+            <div class="photo-card" onclick="openLightbox(7)"><img src="FOTO8.jpg"><div class="photo-meta">ESTUDIO 08 | 60x40 cm</div></div>
+        </div>
+
+        <section class="curatorial">
+            <h2>EXTENSIÓN SOBRE EL MOVIMIENTO ERRANTE</h2>
+            <div class="desc-item">
+                <h4>La Reivindicación de la Deriva</h4>
+                <p>La Sociedad Errante es un contragolpe necesario. En un mundo comercializado, errar es la recuperación del tiempo propio.</p>
+            </div>
+            <div class="desc-item">
+                <h4>Salir es Entrar</h4>
+                <p>Al afirmar que "salir era en realidad entrar", reconocemos que el entorno urbano es un espejo de nuestra propia psique.</p>
+            </div>
+        </section>
+
+        <div class="conclusion">
+            "Dado que el arte no se puede enseñar y no existen maestros humanos, hay solo dos maestros si de veras deseas alguno: uno es tu propia infancia y el otro la naturaleza."
+        </div>
+
+        <div class="footer-block">
+            
+            <div class="contact-line">
+                <a href="mailto:dremeseiro@gmail.com">dremeseiro@gmail.com</a>
+                <a href="https://wa.me/34654391870" target="_blank">WhatsApp</a>
+            </div>
+            <div class="copyright-line">© 2026 Daniel Remeseiro. Todos los derechos reservados.</div>
+        </div>
+
+        <div class="no-print-zone">
+            <button class="btn-pdf" onclick="window.print()">DESCARGAR PDF</button>
+        </div>
+    </div>
+
+    <div id="lightbox">
+        <button class="nav-arrow prev-arrow" onclick="changeImg(-1)">&#10094;</button>
+        <img id="lightbox-img" src="" alt="Vista ampliada">
+        <div id="lightbox-caption"></div>
+        <button class="nav-arrow next-arrow" onclick="changeImg(1)">&#10095;</button>
+        <div class="lightbox-controls">
+            <button class="btn-lightbox" onclick="closeLightbox()">CERRAR</button>
+            <button class="btn-lightbox" onclick="goHome()">INICIO</button>
+        </div>
+    </div>
+
+    <script>
+        const data = [
+            { src: "FOTO1.jpg", title: "ESTUDIO 01 | 60x40 cm" },
+            { src: "FOTO2.jpg", title: "ESTUDIO 02 | 60x40 cm" },
+            { src: "FOTO3.jpg", title: "ESTUDIO 03 | 60x40 cm" },
+            { src: "FOTO4.jpg", title: "ESTUDIO 04 | 60x40 cm" },
+            { src: "FOTO5.jpg", title: "ESTUDIO 05 | 60x40 cm" },
+            { src: "FOTO6.jpg", title: "ESTUDIO 06 | 60x40 cm" },
+            { src: "FOTO7.jpg", title: "ESTUDIO 07 | 60x40 cm" },
+            { src: "FOTO8.jpg", title: "ESTUDIO 08 | 60x40 cm" }
+        ];
+        
+        let currentIndex = 0;
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCap = document.getElementById('lightbox-caption');
+
+        function openLightbox(index) {
+            currentIndex = index;
+            updateImage();
+            lightbox.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function updateImage() {
+            lightboxImg.src = data[currentIndex].src;
+            lightboxCap.innerText = data[currentIndex].title;
+        }
+
+        function changeImg(step) {
+            currentIndex = (currentIndex + step + data.length) % data.length;
+            updateImage();
+        }
+
+        function closeLightbox() {
+            lightbox.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function goHome() {
+            closeLightbox();
+            document.getElementById('inicio').scrollIntoView();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.style.display === 'flex') {
+                if (e.key === 'ArrowRight') changeImg(1);
+                if (e.key === 'ArrowLeft') changeImg(-1);
+                if (e.key === 'Escape') closeLightbox();
+            }
+        });
+    </script>
+</body>
+</html>
